@@ -168,3 +168,73 @@ class LDA(BinaryClassifier):
             "class_avg": self.class_avg,
             "class_std": self.class_std
         }
+
+
+class QDA(BinaryClassifier):
+    def _calc_avg(self) -> dict[str, np.array]:
+        """
+        Calculating mean of parameters for every class in the model data.
+        Could be executed only after fit method was executed
+            (because we need data).
+        """
+        return {
+            the_class: np.mean(self.x[self.y == the_class], axis=0)
+            for the_class in self.classes
+        }
+
+    def _calc_cov_matrix(self) -> dict[str, np.array]:
+        """
+        Calculate a separate covariance matrix for each class.
+        """
+        cov_matrix = {}
+
+        for the_class in self.classes:
+            class_data = self.x[self.y == the_class]
+            cov_matrix[the_class] = np.cov(class_data, rowvar=False, ddof=1)
+
+        return cov_matrix
+
+    def fit(self, x: list[list], y: list) -> None:
+        super().fit(x, y)
+
+        self.class_avg = self._calc_avg()
+        self.cov_matrix = self._calc_cov_matrix()
+
+    def predict_proba(self, x: list, the_class: str) -> float:
+        cov_inv = np.linalg.inv(self.cov_matrix[the_class])
+        diff = x - self.class_avg[the_class]
+
+        exponent = -0.5 * np.dot(np.dot(diff.T, cov_inv), diff)
+        prefactor = 1 / np.sqrt(
+            (2 * np.pi)**len(x) *
+            np.linalg.det(self.cov_matrix[the_class])
+            )
+
+        return np.exp(exponent) * prefactor
+
+    def get_params(self) -> dict:
+        return {
+            "class_avg": self.class_avg,
+            "cov_matrix": self.cov_matrix
+        }
+
+    def find_border(self) -> tuple[np.array, np.array, np.array]:
+        x_min = self.x[:, 0].min() - 1
+        x_max = self.x[:, 0].max() + 1
+
+        y_min = self.x[:, 1].min() - 1
+        y_max = self.x[:, 1].max() + 1
+
+        xx, yy = np.meshgrid(
+            np.arange(x_min, x_max, 0.1),
+            np.arange(y_min, y_max, 0.1)
+            )
+
+        z = np.array(
+            [
+                self.predict([a, b])
+                for a, b in zip(np.ravel(xx), np.ravel(yy))
+            ]
+            ).reshape(xx.shape)
+
+        return xx, yy, z
