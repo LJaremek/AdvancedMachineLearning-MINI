@@ -72,6 +72,30 @@ class BinaryClassifier(ABC):
     def get_params(self) -> dict:
         ...
 
+    def find_border(self) -> tuple[np.array, np.array, np.array]:
+        """
+        Looking for x, z, y parameters for drawing border line between classes.
+        """
+        x_min = self.x[:, 0].min() - 1
+        x_max = self.x[:, 0].max() + 1
+
+        y_min = self.x[:, 1].min() - 1
+        y_max = self.x[:, 1].max() + 1
+
+        xx, yy = np.meshgrid(
+            np.arange(x_min, x_max, 0.1),
+            np.arange(y_min, y_max, 0.1)
+            )
+
+        z = np.array(
+            [
+                self.predict([a, b])
+                for a, b in zip(np.ravel(xx), np.ravel(yy))
+            ]
+            ).reshape(xx.shape)
+
+        return xx, yy, z
+
 
 class LDA(BinaryClassifier):
     def _calc_avg(self) -> dict[str, np.array]:
@@ -124,30 +148,6 @@ class LDA(BinaryClassifier):
         self.class_avg: dict[str, np.array] = self._calc_avg()
         self.class_std: dict[str, np.array] = self._calc_std()
         self.cov_matrix: np.array = self._calc_cov_matrix()
-
-    def find_border(self) -> tuple[float, float, float]:
-        """
-        Calculating border line between classes.
-        Function calculatin parameters: a, b, c
-        Which you can use to calc the line based on x points:
-            y(x) = -(c + a*x) / b
-
-        Output:
-         * parameters: tuple[float, flaot, float]
-        """
-        cov_inv = np.linalg.inv(self.cov_matrix)
-
-        a = (self.class_avg[0] - self.class_avg[1]).dot(cov_inv)[0]
-        b = (self.class_avg[0] - self.class_avg[1]).dot(cov_inv)[1]
-        c = (
-            -0.5 *
-            (
-                self.class_avg[0].dot(cov_inv).dot(self.class_avg[0]) -
-                self.class_avg[1].dot(cov_inv).dot(self.class_avg[1])
-            )
-        )
-
-        return a, b, c
 
     def predict_proba(self, x: list, the_class: str) -> float:
         class_prob = 1
@@ -218,27 +218,6 @@ class QDA(BinaryClassifier):
             "cov_matrix": self.cov_matrix
         }
 
-    def find_border(self) -> tuple[np.array, np.array, np.array]:
-        x_min = self.x[:, 0].min() - 1
-        x_max = self.x[:, 0].max() + 1
-
-        y_min = self.x[:, 1].min() - 1
-        y_max = self.x[:, 1].max() + 1
-
-        xx, yy = np.meshgrid(
-            np.arange(x_min, x_max, 0.1),
-            np.arange(y_min, y_max, 0.1)
-            )
-
-        z = np.array(
-            [
-                self.predict([a, b])
-                for a, b in zip(np.ravel(xx), np.ravel(yy))
-            ]
-            ).reshape(xx.shape)
-
-        return xx, yy, z
-
 
 class NaiveBayes(BinaryClassifier):
     def fit(self, x: list[list], y: list) -> None:
@@ -261,24 +240,3 @@ class NaiveBayes(BinaryClassifier):
 
     def get_params(self) -> dict:
         return self.feature_stats
-
-    def find_border(self) -> tuple[np.array, np.array, np.array]:
-        x_min = self.x[:, 0].min() - 1
-        x_max = self.x[:, 0].max() + 1
-
-        y_min = self.x[:, 1].min() - 1
-        y_max = self.x[:, 1].max() + 1
-
-        xx, yy = np.meshgrid(
-            np.arange(x_min, x_max, 0.1),
-            np.arange(y_min, y_max, 0.1)
-            )
-
-        z = np.array(
-            [
-                self.predict([a, b])
-                for a, b in zip(np.ravel(xx), np.ravel(yy))
-            ]
-            ).reshape(xx.shape)
-
-        return xx, yy, z
