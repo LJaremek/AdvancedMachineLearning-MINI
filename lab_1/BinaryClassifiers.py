@@ -238,3 +238,47 @@ class QDA(BinaryClassifier):
             ).reshape(xx.shape)
 
         return xx, yy, z
+
+
+class NaiveBayes(BinaryClassifier):
+    def fit(self, x: list[list], y: list) -> None:
+        super().fit(x, y)
+        self.feature_stats = {}
+
+        for the_class in self.classes:
+            class_data = self.x[self.y == the_class]
+            self.feature_stats[the_class] = [
+                (np.mean(feature), np.std(feature, ddof=1))
+                for feature in zip(*class_data)
+                ]
+
+    def predict_proba(self, x: list, the_class: str) -> float:
+        log_prob = 0
+        for i, feature in enumerate(x):
+            avg, std = self.feature_stats[the_class][i]
+            log_prob += np.log(self.normal_pdf(feature, avg, std))
+        return np.exp(log_prob)
+
+    def get_params(self) -> dict:
+        return self.feature_stats
+
+    def find_border(self) -> tuple[np.array, np.array, np.array]:
+        x_min = self.x[:, 0].min() - 1
+        x_max = self.x[:, 0].max() + 1
+
+        y_min = self.x[:, 1].min() - 1
+        y_max = self.x[:, 1].max() + 1
+
+        xx, yy = np.meshgrid(
+            np.arange(x_min, x_max, 0.1),
+            np.arange(y_min, y_max, 0.1)
+            )
+
+        z = np.array(
+            [
+                self.predict([a, b])
+                for a, b in zip(np.ravel(xx), np.ravel(yy))
+            ]
+            ).reshape(xx.shape)
+
+        return xx, yy, z
