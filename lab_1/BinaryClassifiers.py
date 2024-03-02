@@ -4,6 +4,8 @@ import numpy as np
 
 
 class BinaryClassifier(ABC):
+    name = "Abstract Binary Classifier"
+
     def normal_pdf(self, x: float, avg: float, std: float) -> float:
         """
         Probability Density Function (PDF).
@@ -98,6 +100,8 @@ class BinaryClassifier(ABC):
 
 
 class LDA(BinaryClassifier):
+    name = "LDA"
+
     def _calc_avg(self) -> dict[str, np.array]:
         """
         Calculating mean of parameters for every class in the model data.
@@ -150,18 +154,16 @@ class LDA(BinaryClassifier):
         self.cov_matrix: np.array = self._calc_cov_matrix()
 
     def predict_proba(self, x: list, the_class: str) -> float:
-        class_prob = 1
+        x = np.array(x)
+        mean_vec = self.class_avg[the_class]
+        cov_inv = np.linalg.inv(self.cov_matrix)
+        diff = x - mean_vec
 
-        for f_i, feature in enumerate(x):
-            prob = self.normal_pdf(
-                feature,
-                self.class_avg[the_class][f_i],
-                self.class_std[the_class][f_i],
-                )
+        log_prob = -0.5 * np.dot(np.dot(diff.T, cov_inv), diff)
+        log_prob -= 0.5 * np.log(np.linalg.det(self.cov_matrix))
+        log_prob -= (len(x) / 2) * np.log(2 * np.pi)
 
-            class_prob *= prob
-
-        return class_prob
+        return np.exp(log_prob)
 
     def get_params(self) -> dict:
         return {
@@ -171,6 +173,8 @@ class LDA(BinaryClassifier):
 
 
 class QDA(BinaryClassifier):
+    name = "QDA"
+
     def _calc_avg(self) -> dict[str, np.array]:
         """
         Calculating mean of parameters for every class in the model data.
@@ -220,6 +224,8 @@ class QDA(BinaryClassifier):
 
 
 class NaiveBayes(BinaryClassifier):
+    name = "Naive Bayes"
+
     def fit(self, x: list[list], y: list) -> None:
         super().fit(x, y)
         self.feature_stats = {}
