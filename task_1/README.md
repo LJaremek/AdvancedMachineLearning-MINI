@@ -61,7 +61,7 @@ File: [BayesianSimulatedData2.ipynb](https://github.com/LJaremek/AdvancedMachine
 
 File: [BayesianSimulatedData3.ipynb](https://github.com/LJaremek/AdvancedMachineLearning-MINI/blob/main/task_1/BayesianSimulatedData3.ipynb)
 
-![Comparing models on 3 datasets]([models_comparation_0_1_datasets.jpg](https://github.com/LJaremek/AdvancedMachineLearning-MINI/blob/main/task_1/plots/models_comparation_0_1_datasets.jpg))
+![Comparing models on 2 datasets ](https://github.com/LJaremek/AdvancedMachineLearning-MINI/blob/main/task_1/plots/models_comparation_0_1_datasets.jpg)
 
 
 ## 3. Comparison of LDA, QDA and NB methods on real data.
