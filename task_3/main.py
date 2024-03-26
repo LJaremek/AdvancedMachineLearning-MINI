@@ -3,9 +3,11 @@ import math
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_predict, StratifiedKFold
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, roc_auc_score
+from sklearn.metrics import roc_curve, auc
+import matplotlib.pyplot as plt
 import numpy as np
 """
 Performance meassures:
@@ -57,55 +59,43 @@ def refitting(model, x: np.array, y: np.array) -> float:
 
     results = y == np.array(preds)
 
-    return sum(results)/len(results)
+    return results
 
 
 def cross_validation(model, x: np.array, y: np.array) -> float:
-    results = cross_val_score(model, x, y)
+    cv = StratifiedKFold(n_splits=10)
+    results = cross_val_predict(model, x, y, cv=cv, method="predict_proba")
 
-    return sum(results)/len(results)
+    return results[:, 1]
 
 
-def bootstrap(model, x: np.array, y: np.array, use_632: bool = False) -> float:
-    accuracy_scores = []
-    n_iterations = 100
-    test_size = 0.25
+def bootstrap(
+        model,
+        x: np.array,
+        y: np.array,
+        use_632: bool = False
+        ) -> np.array:
+    from random import randint
 
-    x_train, x_test, y_train, y_test = train_test_split(
-        x, y,
-        test_size=test_size,
-        random_state=0
-    )
+    n_iterations = len(y)
+    batch_size = 0.3
+    size = len(x)
+    results = []
 
-    original_accuracy = accuracy_score(
-        y_test,
-        model.fit(x_train, y_train).predict(x_test)
-    )
-
-    # Bootstrap
     for _ in range(n_iterations):
-        indices = np.random.choice(
-            range(len(x_train)),
-            size=len(x_train),
-            replace=True
-        )
+        model = LogisticRegression(penalty="l2", C=1000)
+        x_batch = []
+        y_batch = []
+        for _ in range(int(size*batch_size)):
+            index = randint(0, int(size*batch_size))
+            x_batch.append(x[index])
+            y_batch.append(y[index])
+        model.fit(x_batch, y_batch)
+        y_pred = model.predict(x)
+        accuracy = np.mean(y_pred == y)
+        results.append(accuracy)
 
-        x_train_bs = x_train[indices]
-        y_train_bs = y_train[indices]
-
-        model.fit(x_train_bs, y_train_bs)
-        y_pred = model.predict(x_test)
-        accuracy_scores.append(accuracy_score(y_test, y_pred))
-
-    if use_632:
-        bootstrap_score = np.mean([
-            0.632 * acc + 0.368 * original_accuracy
-            for acc in accuracy_scores
-        ])
-    else:
-        bootstrap_score = np.mean(accuracy_scores)
-
-    return bootstrap_score
+    return results
 
 
 x, y = generate_data(1, 20, 1000)
@@ -114,9 +104,24 @@ lf = LogisticRegression(penalty="l2", C=1000)
 ct = DecisionTreeClassifier()
 
 
-for model in (lf, ct):
-    print(model)
-    print(refitting(model, x, y))
-    print(cross_validation(model, x, y))
-    print(bootstrap(model, x, y))
-    print(bootstrap(model, x, y, use_632=True))
+def draw_roc(model, x: np.array, y: np.array, method) -> None:
+    scores = method(model, x, y)
+    fpr, tpr, _ = roc_curve(y, scores)
+    roc_auc = auc(fpr, tpr)
+
+    plt.figure()
+
+    roc_label = f"ROC curve (area = {round(roc_auc, 3)})"
+    plt.plot(fpr, tpr, color="darkorange", lw=2, label=roc_label)
+    plt.plot([0, 1], [0, 1], color="navy", lw=2, linestyle="--")
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("Receiver Operating Characteristic")
+    plt.legend(loc="lower right")
+    plt.show()
+    plt.savefig("test.png")
+
+
+draw_roc(lf, x, y, bootstrap)
