@@ -1,5 +1,3 @@
-# Klasy -1 i 1, nie 0 i 1 czy coś innego
-
 from tools import generate_datasets, generate_circular_dataset
 from tools import plot_datasets, plot_circular_dataset
 

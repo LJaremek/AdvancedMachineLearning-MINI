@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 
-def generate_datasets(m_values):
+def generate_datasets(m_values: list[float]) -> dict[str, pd.DataFrame]:
     datasets = {}
     for m in m_values:
         x1_y0 = np.random.normal(0, 1, 500)
@@ -14,16 +14,20 @@ def generate_datasets(m_values):
         x2_y1 = np.random.normal(m, 1, 500)
         y1 = np.ones(500)
 
-        features = np.vstack((np.column_stack((x1_y0, x2_y0, y0)), 
-                              np.column_stack((x1_y1, x2_y1, y1))))
+        features = np.vstack(
+            (
+                np.column_stack((x1_y0, x2_y0, y0)),
+                np.column_stack((x1_y1, x2_y1, y1))
+            )
+        )
         df = pd.DataFrame(features, columns=["x1", "x2", "y"])
 
         datasets[f"m={m}"] = df
-    
+
     return datasets
 
 
-def generate_circular_dataset(noise_level=0.1):
+def generate_circular_dataset(noise_level: float = 0.1) -> pd.DataFrame:
     x1_y1 = np.random.uniform(-1, 1, 500)
     x2_y1 = np.sqrt(1 - x1_y1**2) * np.random.choice([1, -1], 500)
     y1 = np.ones(500)
@@ -37,14 +41,22 @@ def generate_circular_dataset(noise_level=0.1):
     x1_y0 *= 1 + np.random.normal(0, noise_level, 500)
     x2_y0 *= 1 + np.random.normal(0, noise_level, 500)
 
-    features = np.vstack((np.column_stack((x1_y0, x2_y0, y0)), 
-                          np.column_stack((x1_y1, x2_y1, y1))))
+    features = np.vstack(
+        (
+            np.column_stack((x1_y0, x2_y0, y0)),
+            np.column_stack((x1_y1, x2_y1, y1))
+        )
+    )
     df = pd.DataFrame(features, columns=['x1', 'x2', 'y'])
 
     return df
 
 
-def plot_datasets(datasets, m_values):
+def plot_datasets(
+        datasets: dict[str, pd.DataFrame],
+        m_values: list[float]
+        ) -> None:
+
     num_plots = len(m_values)
     _, axes = plt.subplots(
         1, num_plots, figsize=(5 * num_plots, 4), sharey=True
@@ -75,7 +87,7 @@ def plot_datasets(datasets, m_values):
     plt.show()
 
 
-def plot_circular_dataset(df):
+def plot_circular_dataset(df: pd.DateOffset) -> None:
     plt.figure(figsize=(6, 6))
     plt.scatter(
         df[df["y"] == 0]["x1"], df[df["y"] == 0]["x2"],
