@@ -9,3 +9,4 @@ Projects:
 5. [AdaBoost](https://github.com/LJaremek/AdvancedMachineLearning-MINI/tree/main/task_5)
 6. [SVM](https://github.com/LJaremek/AdvancedMachineLearning-MINI/tree/main/task_6) - draft
 7. [Density](https://github.com/LJaremek/AdvancedMachineLearning-MINI/tree/main/task_7)
+8. [Feature selection](https://github.com/LJaremek/AdvancedMachineLearning-MINI/tree/main/task_8) - draft
