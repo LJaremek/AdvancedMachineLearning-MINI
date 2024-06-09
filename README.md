@@ -10,7 +10,7 @@ Projects from the lecture "Advanced Machine Learning" at the MINI faculty at WUT
 | 4           | [Bagging](https://github.com/LJaremek/AdvancedMachineLearning-MINI/tree/main/task_4)                  | 3/3 |
 | 5           | [AdaBoost](https://github.com/LJaremek/AdvancedMachineLearning-MINI/tree/main/task_5)                 | - |
 | 6           | [SVM](https://github.com/LJaremek/AdvancedMachineLearning-MINI/tree/main/task_6) - draft              | - |
-| 7           | [Density](https://github.com/LJaremek/AdvancedMachineLearning-MINI/tree/main/task_7)                  | - |
+| 7           | [Density](https://github.com/LJaremek/AdvancedMachineLearning-MINI/tree/main/task_7)                  | 3/3 |
 | 8           | [Feature selection](https://github.com/LJaremek/AdvancedMachineLearning-MINI/tree/main/task_8)        | - |
 | 9           | [Regression](https://github.com/LJaremek/AdvancedMachineLearning-MINI/tree/main/task_9)             | - |
 | 10          | [MARS method](https://github.com/LJaremek/AdvancedMachineLearning-MINI/tree/main/task_10)            | - |
